@@ -7,7 +7,8 @@ An implementation of IPasswordHasher<TUser> using [Scrypt.NET](https://github.co
 ## Installation
 
 ```
-services.AddScoped<IPasswordHasher<ApplicationUser>, ScryptPasswordHasher<ApplicationUser>>();
+services.AddIdentity<TUser, TRole>();
+services.AddScoped<IPasswordHasher<TUser>, ScryptPasswordHasher<TUser>>();
 ```
 
 ### Options
