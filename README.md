@@ -1,4 +1,4 @@
-# Scrypt Password Hasher for ASP.NET Core Identity (ASP.NET Identity 3)
+# Scrypt Password Hasher for ASP.NET Core Identity
 
 [![NuGet](https://img.shields.io/nuget/v/ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.svg)](https://www.nuget.org/packages/ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher/)
 
