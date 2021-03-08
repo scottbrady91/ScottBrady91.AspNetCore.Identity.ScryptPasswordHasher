@@ -6,22 +6,27 @@ An implementation of IPasswordHasher<TUser> using [Scrypt.NET](https://github.co
 
 ## Installation
 
-```
+```csharp
 services.AddIdentity<TUser, TRole>();
 services.AddScoped<IPasswordHasher<TUser>, ScryptPasswordHasher<TUser>>();
 ```
 
 ### Options
 
- - **IterationCount**: int
- - **BlockSize**: int
- - **ThreadCount**: int
+- **IterationCount**: int
+- **BlockSize**: int
+- **ThreadCount**: int
 
 Register with:
-```
+
+```csharp
 services.Configure<ScryptPasswordHasherOptions>(options => {
-	options.IterationCount = 16384;
-	options.BlockSize = 8;
-	options.ThreadCount = 1;
+    options.IterationCount = 16384;
+    options.BlockSize = 8;
+    options.ThreadCount = 1;
 });
 ```
+
+## .NET Support
+
+This library supports Current and LTS versions of .NET.
