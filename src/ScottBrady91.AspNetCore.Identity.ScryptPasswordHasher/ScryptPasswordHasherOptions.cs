@@ -1,5 +1,8 @@
 ﻿namespace ScottBrady91.AspNetCore.Identity
 {
+    /// <summary>
+    /// Options for ScryptPasswordHasher.
+    /// </summary>
     public class ScryptPasswordHasherOptions
     {
         public int IterationCount { get; set; } = 16384;

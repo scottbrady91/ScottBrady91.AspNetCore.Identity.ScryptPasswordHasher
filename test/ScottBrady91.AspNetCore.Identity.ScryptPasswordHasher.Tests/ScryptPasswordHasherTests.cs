@@ -9,16 +9,44 @@ namespace ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.Tests
 {
     public class ScryptPasswordHasherTests
     {
+        private ScryptPasswordHasherOptions options = new ScryptPasswordHasherOptions();
+
+        private ScryptPasswordHasher<string> CreateSut() =>
+            new ScryptPasswordHasher<string>(
+                options != null ? new OptionsWrapper<ScryptPasswordHasherOptions>(options) : null);
+        
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void HashPassword_WhenPasswordIsNullOrWhitespace_ExpectArgumentNullException(string password)
+        {
+            var sut = CreateSut();
+            Assert.Throws<ArgumentNullException>(() => sut.HashPassword(null, password));
+        }
+        
         [Fact]
         public void HashPassword_WithDefaultSettings_ExpectVerifiableHash()
         {
             var password = Guid.NewGuid().ToString();
 
-            var hasher = new ScryptPasswordHasher<string>();
-            var hashedPassword = hasher.HashPassword("", password);
+            var sut = CreateSut();
+            var hashedPassword = sut.HashPassword("", password);
 
             var encoder = new ScryptEncoder();
             encoder.Compare(password, hashedPassword).Should().BeTrue();
+        }
+
+        [Fact]
+        public void HashPassword_WhenCalledMultipleTimesWithSamePlaintext_ExpectDifferentHash()
+        {
+            var password = Guid.NewGuid().ToString();
+
+            var sut = CreateSut();
+            var hashedPassword1 = sut.HashPassword("", password);
+            var hashedPassword2 = sut.HashPassword("", password);
+
+            hashedPassword1.Should().NotBe(hashedPassword2);
         }
 
         [Fact]
@@ -31,13 +59,35 @@ namespace ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.Tests
 
             var password = Guid.NewGuid().ToString();
 
-            var hasher = new ScryptPasswordHasher<string>(
-                new OptionsWrapper<ScryptPasswordHasherOptions>(
-                    new ScryptPasswordHasherOptions {IterationCount = iterationCount, BlockSize = blockSize, ThreadCount = threadCount}));
-            var hashedPassword = hasher.HashPassword("", password);
+            options.IterationCount = iterationCount;
+            options.BlockSize = blockSize;
+            options.ThreadCount = threadCount;
+            var sut = CreateSut();
+            
+            var hashedPassword = sut.HashPassword("", password);
 
             var encoder = new ScryptEncoder();
             encoder.Compare(password, hashedPassword).Should().BeTrue();
+        }
+        
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void VerifyHashedPassword_WhenHashedPasswordIsNullOrWhitespace_ExpectArgumentNullException(string hashedPassword)
+        {
+            var sut = CreateSut();
+            Assert.Throws<ArgumentNullException>(() => sut.VerifyHashedPassword(null, hashedPassword, Guid.NewGuid().ToString()));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void VerifyHashedPassword_WhenPasswordIsNullOrWhitespace_ExpectArgumentNullException(string password)
+        {
+            var sut = CreateSut();
+            Assert.Throws<ArgumentNullException>(() => sut.VerifyHashedPassword(null, Guid.NewGuid().ToString(), password));
         }
 
         [Fact]
@@ -47,9 +97,9 @@ namespace ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.Tests
             var encoder = new ScryptEncoder();
             var hashedPassword = encoder.Encode(password);
 
-            var hasher = new ScryptPasswordHasher<string>();
+            var sut = CreateSut();
 
-            hasher.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Success);
+            sut.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Success);
         }
         
         [Fact]
@@ -64,9 +114,9 @@ namespace ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.Tests
             var encoder = new ScryptEncoder(iterationCount, blockSize, threadCount);
             var hashedPassword = encoder.Encode(password);
 
-            var hasher = new ScryptPasswordHasher<string>();
+            var sut = CreateSut();
 
-            hasher.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Success);
+            sut.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Success);
         }
 
         [Fact]
@@ -76,9 +126,9 @@ namespace ScottBrady91.AspNetCore.Identity.ScryptPasswordHasher.Tests
             var encoder = new ScryptEncoder();
             var hashedPassword = encoder.Encode(Guid.NewGuid().ToString());
 
-            var hasher = new ScryptPasswordHasher<string>();
+            var sut = CreateSut();
 
-            hasher.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Failed);
+            sut.VerifyHashedPassword("", hashedPassword, password).Should().Be(PasswordVerificationResult.Failed);
         }
     }
 }
